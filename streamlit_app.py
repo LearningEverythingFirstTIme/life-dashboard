@@ -53,13 +53,14 @@ try:
 except:
     FINNHUB_API_KEY = os.environ.get('FINNHUB_API_KEY', '')
 
-# File paths (relative for Streamlit Cloud)
-MOOD_DATA_FILE = "mood_data.json"
-DECISIONS_FILE = "decisions.json"
-IDEAS_FILE = "ideas.json"
-AA_MEETINGS_FILE = "aa_meetings.json"
-AA_ATTENDED_FILE = "aa_attended.json"
-KIMI_TODOS_FILE = "kimi_todos.md"
+# File paths (relative to app directory)
+APP_DIR = Path(__file__).parent
+MOOD_DATA_FILE = APP_DIR / "mood_data.json"
+DECISIONS_FILE = APP_DIR / "decisions.json"
+IDEAS_FILE = APP_DIR / "ideas.json"
+AA_MEETINGS_FILE = APP_DIR / "aa_meetings.json"
+AA_ATTENDED_FILE = APP_DIR / "aa_attended.json"
+KIMI_TODOS_FILE = APP_DIR / "kimi_todos.md"
 SESSIONS_DIR = "/home/openclaw/.openclaw/agents/main/sessions"
 
 # Weather
@@ -516,8 +517,9 @@ def save_mood(mood, note=""):
     try:
         # Load existing data or create empty dict
         data = {}
-        if Path(MOOD_DATA_FILE).exists():
-            with open(MOOD_DATA_FILE, 'r') as f:
+        mood_file = Path(MOOD_DATA_FILE)
+        if mood_file.exists():
+            with open(mood_file, 'r') as f:
                 data = json.load(f)
         
         today = datetime.now().strftime('%Y-%m-%d')
@@ -531,7 +533,7 @@ def save_mood(mood, note=""):
             'timestamp': datetime.now().isoformat()
         })
         
-        with open(MOOD_DATA_FILE, 'w') as f:
+        with open(mood_file, 'w') as f:
             json.dump(data, f, indent=2)
         
         # Clear cache
