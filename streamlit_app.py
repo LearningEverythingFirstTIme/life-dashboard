@@ -869,58 +869,6 @@ with st.expander("✅ Tasks", expanded=False):
         except Exception as e:
             st.error(f"Error: {e}")
 
-# Row 7: Activity (expander)
-with st.expander("🔥 Activity", expanded=False):
-    st.markdown("### Activity Heatmap")
-    
-    try:
-        sessions = get_activity_data()
-        
-        if sessions:
-            # Aggregate by date
-            date_counts = defaultdict(int)
-            for s in sessions:
-                date_counts[s['date']] += s['messages']
-            
-            # Create dataframe
-            data = []
-            for d, count in sorted(date_counts.items()):
-                data.append({'date': d.isoformat(), 'messages': count})
-            
-            df = pd.DataFrame(data)
-            
-            if not df.empty:
-                # Simple heatmap using Altair
-                df['date'] = pd.to_datetime(df['date'])
-                df['day'] = df['date'].dt.dayofweek
-                df['week'] = df['date'].dt.isocalendar().week
-                df['month'] = df['date'].dt.month_name()
-                
-                # Chart
-                chart = alt.Chart(df).mark_rect().encode(
-                    x=alt.X('date', title='Date'),
-                    y=alt.Y('messages', title='Messages'),
-                    color=alt.Color('messages', scale=alt.Scale(scheme='greens'))
-                ).properties(height=300)
-                
-                st.altair_chart(chart, use_container_width=True)
-                
-                # Stats
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("Total Sessions", len(data))
-                with col2:
-                    st.metric("Total Messages", df['messages'].sum())
-                with col3:
-                    st.metric("Avg Messages/Day", f"{df['messages'].mean():.1f}")
-            else:
-                st.info("No activity data available")
-        else:
-            st.info("No recent session data available")
-    
-    except Exception as e:
-        st.error(f"Error loading activity data: {e}")
-
 # Logout button
 st.markdown("---")
 if st.button("🔒 Logout"):
