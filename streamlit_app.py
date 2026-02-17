@@ -779,12 +779,14 @@ with st.expander("😊 Mood", expanded=False):
         
         # Save button
         if st.button("💾 Save Mood", key="save_mood_btn"):
-            if save_mood(mood_options[st.session_state.selected_mood], note):
-                st.success(f"Mood saved: {st.session_state.selected_mood}")
+            mood_label = mood_options.get(st.session_state.selected_mood, 'neutral')
+            success = save_mood(mood_label, success:
+                st note)
+            if.success(f"Mood saved: {st.session_state.selected_mood}")
                 st.session_state.selected_mood = None
                 st.rerun()
             else:
-                st.error("Failed to save mood")
+                st.error("Failed to save mood - check file permissions")
     
     # Show recent mood history
     st.markdown("---")
@@ -837,9 +839,9 @@ with st.expander("😊 Mood", expanded=False):
                     })
                 
                 if chart_data:
-                    df = pd.DataFrame(chart_data)
+                    df = pd.DataFrame(chart_data[::-1])  # Reverse to chronological order
                     chart = alt.Chart(df).mark_line(point=True).encode(
-                        x=alt.X('date', title=None, sort=None),
+                        x=alt.X('date', title=None, sort='ascending'),
                         y=alt.Y('value', scale=alt.Scale(domain=[0, 7]), title='Mood'),
                         tooltip=['date', 'emoji']
                     ).properties(height=150)
