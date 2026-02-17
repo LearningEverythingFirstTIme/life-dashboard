@@ -53,14 +53,15 @@ try:
 except:
     FINNHUB_API_KEY = os.environ.get('FINNHUB_API_KEY', '')
 
-# File paths (relative to app directory)
-APP_DIR = Path(__file__).parent
-MOOD_DATA_FILE = APP_DIR / "mood_data.json"
-DECISIONS_FILE = APP_DIR / "decisions.json"
-IDEAS_FILE = APP_DIR / "ideas.json"
-AA_MEETINGS_FILE = APP_DIR / "aa_meetings.json"
-AA_ATTENDED_FILE = APP_DIR / "aa_attended.json"
-KIMI_TODOS_FILE = APP_DIR / "kimi_todos.md"
+# File paths - use absolute path based on where the app runs
+import os
+APP_DIR = Path.cwd()
+MOOD_DATA_FILE = str(APP_DIR / "mood_data.json")
+DECISIONS_FILE = str(APP_DIR / "decisions.json")
+IDEAS_FILE = str(APP_DIR / "ideas.json")
+AA_MEETINGS_FILE = str(APP_DIR / "aa_meetings.json")
+AA_ATTENDED_FILE = str(APP_DIR / "aa_attended.json")
+KIMI_TODOS_FILE = str(APP_DIR / "kimi_todos.md")
 SESSIONS_DIR = "/home/openclaw/.openclaw/agents/main/sessions"
 
 # Weather
@@ -517,9 +518,8 @@ def save_mood(mood, note=""):
     try:
         # Load existing data or create empty dict
         data = {}
-        mood_file = Path(MOOD_DATA_FILE)
-        if mood_file.exists():
-            with open(mood_file, 'r') as f:
+        if Path(MOOD_DATA_FILE).exists():
+            with open(MOOD_DATA_FILE, 'r') as f:
                 data = json.load(f)
         
         today = datetime.now().strftime('%Y-%m-%d')
@@ -533,7 +533,7 @@ def save_mood(mood, note=""):
             'timestamp': datetime.now().isoformat()
         })
         
-        with open(mood_file, 'w') as f:
+        with open(MOOD_DATA_FILE, 'w') as f:
             json.dump(data, f, indent=2)
         
         # Clear cache
@@ -556,17 +556,16 @@ def get_decisions():
 def add_decision(decision, context=""):
     """Add a decision to JSON file"""
     try:
-        decisions_file = Path(DECISIONS_FILE)
         decisions = []
-        if decisions_file.exists():
-            with open(decisions_file, 'r') as f:
+        if Path(DECISIONS_FILE).exists():
+            with open(DECISIONS_FILE, 'r') as f:
                 decisions = json.load(f)
         decisions.append({
             'timestamp': datetime.now().isoformat(),
             'decision': decision,
             'context': context
         })
-        with open(decisions_file, 'w') as f:
+        with open(DECISIONS_FILE, 'w') as f:
             json.dump(decisions, f, indent=2)
         get_decisions.clear()
         return True
@@ -587,17 +586,16 @@ def get_ideas():
 def add_idea(idea, context=""):
     """Add an idea to JSON file"""
     try:
-        ideas_file = Path(IDEAS_FILE)
         ideas = []
-        if ideas_file.exists():
-            with open(ideas_file, 'r') as f:
+        if Path(IDEAS_FILE).exists():
+            with open(IDEAS_FILE, 'r') as f:
                 ideas = json.load(f)
         ideas.append({
             'timestamp': datetime.now().isoformat(),
             'idea': idea,
             'context': context
         })
-        with open(ideas_file, 'w') as f:
+        with open(IDEAS_FILE, 'w') as f:
             json.dump(ideas, f, indent=2)
         get_ideas.clear()
         return True
