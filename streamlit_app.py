@@ -850,7 +850,7 @@ with st.expander("😊 Mood", expanded=False):
                         label_to_emoji = {v: k for k, v in mood_options.items()}
                         emoji = label_to_emoji.get(entry.get('mood', ''), '❓')
                         
-                        ts = entry.get('timestamp', '')
+                        ts = entry.get('created_at', entry.get('timestamp', ''))
                         try:
                             dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
                             time_str = dt.strftime('%H:%M')
