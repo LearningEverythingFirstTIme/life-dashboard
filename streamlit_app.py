@@ -53,15 +53,13 @@ try:
 except:
     FINNHUB_API_KEY = os.environ.get('FINNHUB_API_KEY', '')
 
-# File paths - use absolute path based on where the app runs
-import os
-APP_DIR = Path.cwd()
-MOOD_DATA_FILE = str(APP_DIR / "mood_data.json")
-DECISIONS_FILE = str(APP_DIR / "decisions.json")
-IDEAS_FILE = str(APP_DIR / "ideas.json")
-AA_MEETINGS_FILE = str(APP_DIR / "aa_meetings.json")
-AA_ATTENDED_FILE = str(APP_DIR / "aa_attended.json")
-KIMI_TODOS_FILE = str(APP_DIR / "kimi_todos.md")
+# File paths - simple filenames work on Streamlit Cloud
+MOOD_DATA_FILE = "mood_data.json"
+DECISIONS_FILE = "decisions.json"
+IDEAS_FILE = "ideas.json"
+AA_MEETINGS_FILE = "aa_meetings.json"
+AA_ATTENDED_FILE = "aa_attended.json"
+KIMI_TODOS_FILE = "kimi_todos.md"
 SESSIONS_DIR = "/home/openclaw/.openclaw/agents/main/sessions"
 
 # Weather
