@@ -31,19 +31,35 @@ if env_file.exists():
                 key, value = line.split('=', 1)
                 os.environ[key] = value
 
-# API Keys
-NOTION_API_KEY = os.environ.get('NOTION_API_KEY', '')
-NOTION_DATABASE_ID = os.environ.get('NOTION_DATABASE_ID', '287cb484-7040-45cd-a44b-315dddbcd010')
-TODOIST_API_KEY = os.environ.get('TODOIST_API_KEY', '')
-FINNHUB_API_KEY = os.environ.get('FINNHUB_API_KEY', '')
+# Get API keys - first try Streamlit secrets, then environment variables
+# Streamlit Cloud secrets are accessed via st.secrets
+try:
+    NOTION_API_KEY = st.secrets.get('NOTION_API_KEY', os.environ.get('NOTION_API_KEY', ''))
+except:
+    NOTION_API_KEY = os.environ.get('NOTION_API_KEY', '')
 
-# File paths
-MOOD_DATA_FILE = "/home/openclaw/.openclaw/workspace/webapp/data/mood_data.json"
-DECISIONS_FILE = "/home/openclaw/.openclaw/workspace/webapp/data/decisions.json"
-IDEAS_FILE = "/home/openclaw/.openclaw/workspace/webapp/data/ideas.json"
-AA_MEETINGS_FILE = "/home/openclaw/.openclaw/workspace/webapp/data/aa_meetings.json"
-AA_ATTENDED_FILE = "/home/openclaw/.openclaw/workspace/webapp/data/aa_attended.json"
-KIMI_TODOS_FILE = "/home/openclaw/.openclaw/workspace/kimi_todos.md"
+try:
+    NOTION_DATABASE_ID = st.secrets.get('NOTION_DATABASE_ID', os.environ.get('NOTION_DATABASE_ID', '287cb484-7040-45cd-a44b-315dddbcd010'))
+except:
+    NOTION_DATABASE_ID = os.environ.get('NOTION_DATABASE_ID', '287cb484-7040-45cd-a44b-315dddbcd010')
+
+try:
+    TODOIST_API_KEY = st.secrets.get('TODOIST_API_KEY', os.environ.get('TODOIST_API_KEY', ''))
+except:
+    TODOIST_API_KEY = os.environ.get('TODOIST_API_KEY', '')
+
+try:
+    FINNHUB_API_KEY = st.secrets.get('FINNHUB_API_KEY', os.environ.get('FINNHUB_API_KEY', ''))
+except:
+    FINNHUB_API_KEY = os.environ.get('FINNHUB_API_KEY', '')
+
+# File paths (relative for Streamlit Cloud)
+MOOD_DATA_FILE = "mood_data.json"
+DECISIONS_FILE = "decisions.json"
+IDEAS_FILE = "ideas.json"
+AA_MEETINGS_FILE = "aa_meetings.json"
+AA_ATTENDED_FILE = "aa_attended.json"
+KIMI_TODOS_FILE = "kimi_todos.md"
 SESSIONS_DIR = "/home/openclaw/.openclaw/agents/main/sessions"
 
 # Weather
@@ -157,16 +173,6 @@ st.markdown("""
     @media (max-width: 768px) {
         section[data-testid="stSidebar"] {
             display: none !important;
-        }
-        .stRadio > div {
-            flex-direction: row !important;
-            flex-wrap: wrap !important;
-            justify-content: center;
-        }
-        div[data-testid="stRadio"] > div > label {
-            padding: 8px 12px !important;
-            margin: 4px !important;
-            font-size: 0.8rem !important;
         }
     }
 </style>
@@ -304,9 +310,9 @@ def get_sobriety_counter():
 
 @st.cache_data(ttl=300)
 def fetch_stocks():
-    """Fetch stock quotes from Finnhub"""
+    """Fetch stock quotes from Finnhub with proper error handling"""
     if not FINNHUB_API_KEY:
-        return {'error': 'FINNHUB_API_KEY not configured'}
+        return {'error': 'Configure FINNHUB_API_KEY in Streamlit Cloud secrets'}
     
     result = {}
     
@@ -327,6 +333,8 @@ def fetch_stocks():
                         'price': price,
                         'change': change
                     })
+                else:
+                    result[category].append({'ticker': ticker, 'error': True})
             except Exception:
                 result[category].append({'ticker': ticker, 'error': True})
     
@@ -334,7 +342,7 @@ def fetch_stocks():
 
 @st.cache_data(ttl=1800)
 def fetch_news():
-    """Fetch news from RSS feeds"""
+    """Fetch news from RSS feeds with proper error handling"""
     news_data = {'general': [], 'tech': [], 'market': []}
     
     for category, feeds in RSS_FEEDS.items():
@@ -354,9 +362,9 @@ def fetch_news():
 
 @st.cache_data(ttl=300)
 def fetch_notion_tasks():
-    """Fetch tasks from Notion"""
+    """Fetch tasks from Notion with proper error handling"""
     if not NOTION_API_KEY:
-        return {'error': 'NOTION_API_KEY not configured'}
+        return {'error': 'Configure NOTION_API_KEY in Streamlit Cloud secrets'}
     
     try:
         url = f"https://api.notion.com/v1/databases/{NOTION_DATABASE_ID}/query"
@@ -433,13 +441,13 @@ def fetch_notion_tasks():
         return {'tasks': filtered[:15]}
     
     except Exception as e:
-        return {'error': str(e)}
+        return {'error': f'Configure NOTION_API_KEY in Streamlit Cloud secrets: {str(e)}'}
 
 @st.cache_data(ttl=300)
 def fetch_todoist_tasks():
-    """Fetch tasks from Todoist"""
+    """Fetch tasks from Todoist with proper error handling"""
     if not TODOIST_API_KEY:
-        return {'error': 'TODOIST_API_KEY not configured'}
+        return {'error': 'Configure TODOIST_API_KEY in Streamlit Cloud secrets'}
     
     try:
         url = "https://api.todoist.com/rest/v2/tasks"
@@ -456,10 +464,10 @@ def fetch_todoist_tasks():
             tasks = response.json()
             return {'tasks': [{'title': t.get('content', 'Untitled'), 'due': t.get('due', {}).get('date')} for t in tasks]}
         else:
-            return {'error': f'API error: {response.status_code}'}
+            return {'error': f'Configure TODOIST_API_KEY in Streamlit Cloud secrets'}
     
     except Exception as e:
-        return {'error': str(e)}
+        return {'error': f'Configure TODOIST_API_KEY in Streamlit Cloud secrets'}
 
 @st.cache_data(ttl=60)
 def fetch_kimi_todos():
@@ -650,106 +658,65 @@ def get_activity_data():
         return []
 
 # ============================================================================
-# MAIN APP
+# MAIN APP - SINGLE PAGE LAYOUT
 # ============================================================================
-
-# Navigation
-pages = [
-    "🏠 Dashboard",
-    "📰 News",
-    "📈 Stocks",
-    "😊 Mood",
-    "📝 Decisions",
-    "💡 Ideas",
-    "✅ Tasks",
-    "🔥 Activity"
-]
 
 st.title("🎯 Life Dashboard")
 
-# Top navigation
-page = st.radio(
-    "Navigate",
-    pages + ["🔒 Logout"],
-    horizontal=True,
-    label_visibility="collapsed"
-)
+# Row 1: Weather | Sobriety Counter | System Info (3 columns)
+st.subheader("📊 Today's Overview")
+row1_col1, row1_col2, row1_col3 = st.columns(3)
 
-# Handle logout
-if page == "🔒 Logout":
-    st.session_state.authenticated = False
-    st.rerun()
-
-# ==================== DASHBOARD ====================
-if page == "🏠 Dashboard":
-    st.header("🏠 Dashboard")
-    
-    # Weather
-    st.subheader("🌤️ Weather")
+# Weather (Column 1)
+with row1_col1:
+    st.markdown("### 🌤️ Weather")
     try:
         weather = fetch_weather()
         if 'error' not in weather.get('current', {}):
             current = weather['current']
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Temperature", f"{current['temp']}°F")
-            with col2:
-                st.metric("Feels Like", f"{current['feels_like']}°F")
-            with col3:
-                st.metric("Humidity", f"{current['humidity']}%")
-            with col4:
-                st.metric("Wind", f"{current['wind']} mph")
+            st.metric("Temperature", f"{current['temp']}°F")
+            st.caption(f"{current['icon']} {current['condition']}")
+            st.caption(f"Feels like: {current['feels_like']}°F | Humidity: {current['humidity']}% | Wind: {current['wind']} mph")
             
-            # Forecast
+            # Small forecast
             if weather['forecast']:
-                cols = st.columns(7)
+                forecast_cols = st.columns(7)
                 for i, day in enumerate(weather['forecast']):
-                    with cols[i]:
-                        st.markdown(f"**{day['day']}**")
-                        st.markdown(f"{day['icon']}")
-                        st.caption(f"{day['high']}° / {day['low']}°")
+                    with forecast_cols[i]:
+                        st.caption(f"**{day['day']}**")
+                        st.caption(f"{day['icon']}")
+                        st.caption(f"{day['high']}°/{day['low']}°")
         else:
-            st.error(f"Weather unavailable: {weather['current'].get('error')}")
+            st.warning(f"Weather unavailable")
     except Exception as e:
-        st.error(f"Weather error: {e}")
-    
-    st.markdown("---")
-    
-    # Sobriety Counter
-    st.subheader("🍀 Sobriety Counter")
+        st.warning(f"Weather unavailable")
+
+# Sobriety Counter (Column 2)
+with row1_col2:
+    st.markdown("### 🍀 Sobriety Counter")
     sobriety = get_sobriety_counter()
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Days Sober", f"{sobriety['days']}")
-    with col2:
-        st.caption(sobriety['duration'])
-    
+    st.metric("Days Sober", f"{sobriety['days']}")
+    st.caption(sobriety['duration'])
     st.markdown(f"> *\"{sobriety['quote']}\"*  \n> — {sobriety['author']}")
-    
-    st.markdown("---")
-    
-    # System Info
-    st.subheader("💻 System Info")
+
+# System Info (Column 3)
+with row1_col3:
+    st.markdown("### 💻 System Info")
     try:
         sys_info = get_system_info()
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("CPU", f"{sys_info['cpu']}%")
-            st.progress(sys_info['cpu'] / 100)
-        with col2:
-            st.metric("RAM", f"{sys_info['ram']}%")
-            st.progress(sys_info['ram'] / 100)
-        with col3:
-            st.metric("Disk", f"{sys_info['disk']}%")
-            st.progress(sys_info['disk'] / 100)
+        st.metric("CPU", f"{sys_info['cpu']}%")
+        st.progress(sys_info['cpu'] / 100)
+        st.metric("RAM", f"{sys_info['ram']}%")
+        st.progress(sys_info['ram'] / 100)
+        st.metric("Disk", f"{sys_info['disk']}%")
+        st.progress(sys_info['disk'] / 100)
     except Exception as e:
-        st.error(f"System info error: {e}")
+        st.warning("System info unavailable")
 
-# ==================== NEWS ====================
-elif page == "📰 News":
-    st.header("📰 News")
-    
+st.markdown("---")
+
+# Row 2: News (expander with 3 tabs)
+with st.expander("📰 News", expanded=False):
     news_tab = st.tabs(["General", "Tech+AI", "Market"])
     
     try:
@@ -764,7 +731,7 @@ elif page == "📰 News":
             for item in news['general'][:15]:
                 st.markdown(f"- [{item['title']}]({item['link']})  \n  *{item['source']}*")
         else:
-            st.info("No news available")
+            st.info("No news available. Check RSS feed configuration.")
     
     with news_tab[1]:
         st.subheader("Tech & AI News")
@@ -772,7 +739,7 @@ elif page == "📰 News":
             for item in news['tech'][:15]:
                 st.markdown(f"- [{item['title']}]({item['link']})  \n  *{item['source']}*")
         else:
-            st.info("No news available")
+            st.info("No news available. Check RSS feed configuration.")
     
     with news_tab[2]:
         st.subheader("Market News")
@@ -780,20 +747,18 @@ elif page == "📰 News":
             for item in news['market'][:15]:
                 st.markdown(f"- [{item['title']}]({item['link']})  \n  *{item['source']}*")
         else:
-            st.info("No news available")
+            st.info("No news available. Check RSS feed configuration.")
 
-# ==================== STOCKS ====================
-elif page == "📈 Stocks":
-    st.header("📈 Stock Quotes")
-    
+# Row 3: Stocks (expander)
+with st.expander("📈 Stocks", expanded=False):
     try:
         stocks = fetch_stocks()
         
         if 'error' in stocks:
-            st.error(stocks['error'])
+            st.warning(stocks['error'])
         else:
             for category, tickers in stocks.items():
-                st.subheader(f"**{category}**")
+                st.markdown(f"**{category}**")
                 
                 cols = st.columns(len(tickers) if tickers else 1)
                 for i, stock in enumerate(tickers):
@@ -809,10 +774,8 @@ elif page == "📈 Stocks":
     except Exception as e:
         st.error(f"Error fetching stocks: {e}")
 
-# ==================== MOOD ====================
-elif page == "😊 Mood":
-    st.header("😊 Mood Tracker")
-    
+# Row 4: Mood tracker (expander)
+with st.expander("😊 Mood Tracker", expanded=False):
     # Mood input
     moods = {
         "😢": "awful",
@@ -889,107 +852,102 @@ elif page == "😊 Mood":
     except Exception as e:
         st.error(f"Error loading mood data: {e}")
 
-# ==================== DECISIONS ====================
-elif page == "📝 Decisions":
-    st.header("📝 Decision Log")
+# Row 5: Decisions + Ideas (two columns in expander)
+with st.expander("📝 Decisions & 💡 Ideas", expanded=False):
+    col_decisions, col_ideas = st.columns(2)
     
-    # Add new decision
-    with st.expander("➕ Add New Decision", expanded=False):
-        new_decision = st.text_input("What did you decide?", key="new_decision")
-        context = st.text_input("Context (optional)", key="decision_context")
-        if st.button("Save Decision"):
-            if new_decision:
-                if add_decision(new_decision, context):
-                    st.success("Decision saved!")
-                    st.rerun()
-                else:
-                    st.error("Failed to save decision")
-            else:
-                st.warning("Please enter a decision")
-    
-    st.markdown("---")
-    
-    # View decisions
-    try:
-        decisions = get_decisions()
+    # Decisions (Column 1)
+    with col_decisions:
+        st.markdown("### 📝 Decision Log")
         
-        if decisions:
-            # Sort by timestamp
-            decisions = sorted(decisions, key=lambda x: x.get('timestamp', ''), reverse=True)
+        # Add new decision
+        with st.expander("➕ Add New Decision", expanded=False):
+            new_decision = st.text_input("What did you decide?", key="new_decision")
+            context = st.text_input("Context (optional)", key="decision_context")
+            if st.button("Save Decision", key="save_decision"):
+                if new_decision:
+                    if add_decision(new_decision, context):
+                        st.success("Decision saved!")
+                        st.rerun()
+                    else:
+                        st.error("Failed to save decision")
+                else:
+                    st.warning("Please enter a decision")
+        
+        # View decisions
+        try:
+            decisions = get_decisions()
             
-            for d in decisions:
-                ts = d.get('timestamp', '')
-                try:
-                    dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
-                    date_str = dt.strftime('%Y-%m-%d %H:%M')
-                except:
-                    date_str = ts
+            if decisions:
+                # Sort by timestamp
+                decisions = sorted(decisions, key=lambda x: x.get('timestamp', ''), reverse=True)
                 
-                with st.expander(f"📝 {date_str}"):
-                    st.markdown(f"**Decision:** {d.get('decision', '')}")
+                for d in decisions[:10]:
+                    ts = d.get('timestamp', '')
+                    try:
+                        dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                        date_str = dt.strftime('%Y-%m-%d %H:%M')
+                    except:
+                        date_str = ts
+                    
+                    st.markdown(f"**{date_str}**: {d.get('decision', '')}")
                     if d.get('context'):
                         st.caption(f"Context: {d.get('context', '')}")
-        else:
-            st.info("No decisions logged yet.")
-    
-    except Exception as e:
-        st.error(f"Error loading decisions: {e}")
-
-# ==================== IDEAS ====================
-elif page == "💡 Ideas":
-    st.header("💡 Ideas Vault")
-    
-    # Add new idea
-    with st.expander("➕ Add New Idea", expanded=False):
-        new_idea = st.text_input("What's your idea?", key="new_idea")
-        context = st.text_input("Context (optional)", key="idea_context")
-        if st.button("Save Idea"):
-            if new_idea:
-                if add_idea(new_idea, context):
-                    st.success("Idea saved!")
-                    st.rerun()
-                else:
-                    st.error("Failed to save idea")
             else:
-                st.warning("Please enter an idea")
-    
-    st.markdown("---")
-    
-    # View ideas
-    try:
-        ideas = get_ideas()
+                st.info("No decisions logged yet.")
         
-        if ideas:
-            # Sort by timestamp
-            ideas = sorted(ideas, key=lambda x: x.get('timestamp', ''), reverse=True)
+        except Exception as e:
+            st.error(f"Error loading decisions: {e}")
+    
+    # Ideas (Column 2)
+    with col_ideas:
+        st.markdown("### 💡 Ideas Vault")
+        
+        # Add new idea
+        with st.expander("➕ Add New Idea", expanded=False):
+            new_idea = st.text_input("What's your idea?", key="new_idea")
+            idea_context = st.text_input("Context (optional)", key="idea_context")
+            if st.button("Save Idea", key="save_idea"):
+                if new_idea:
+                    if add_idea(new_idea, idea_context):
+                        st.success("Idea saved!")
+                        st.rerun()
+                    else:
+                        st.error("Failed to save idea")
+                else:
+                    st.warning("Please enter an idea")
+        
+        # View ideas
+        try:
+            ideas = get_ideas()
             
-            for i in ideas:
-                ts = i.get('timestamp', '')
-                try:
-                    dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
-                    date_str = dt.strftime('%Y-%m-%d %H:%M')
-                except:
-                    date_str = ts
+            if ideas:
+                # Sort by timestamp
+                ideas = sorted(ideas, key=lambda x: x.get('timestamp', ''), reverse=True)
                 
-                with st.expander(f"💡 {date_str}"):
-                    st.markdown(f"**Idea:** {i.get('idea', '')}")
+                for i in ideas[:10]:
+                    ts = i.get('timestamp', '')
+                    try:
+                        dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                        date_str = dt.strftime('%Y-%m-%d %H:%M')
+                    except:
+                        date_str = ts
+                    
+                    st.markdown(f"**{date_str}**: {i.get('idea', '')}")
                     if i.get('context'):
                         st.caption(f"Context: {i.get('context', '')}")
-        else:
-            st.info("No ideas yet.")
-    
-    except Exception as e:
-        st.error(f"Error loading ideas: {e}")
+            else:
+                st.info("No ideas yet.")
+        
+        except Exception as e:
+            st.error(f"Error loading ideas: {e}")
 
-# ==================== TASKS ====================
-elif page == "✅ Tasks":
-    st.header("✅ Tasks")
-    
-    # Tabs for different task sources
+# Row 6: Tasks tabs (expander)
+with st.expander("✅ Tasks", expanded=False):
     task_tabs = st.tabs(["Notion", "Todoist", "Kimi's TODOs"])
     
     with task_tabs[0]:
-        st.subheader("📓 Notion Tasks")
+        st.markdown("### 📓 Notion Tasks")
         try:
             notion = fetch_notion_tasks()
             if 'error' in notion:
@@ -1004,7 +962,7 @@ elif page == "✅ Tasks":
             st.error(f"Error: {e}")
     
     with task_tabs[1]:
-        st.subheader("✅ Todoist Tasks")
+        st.markdown("### ✅ Todoist Tasks")
         try:
             todoist = fetch_todoist_tasks()
             if 'error' in todoist:
@@ -1019,7 +977,7 @@ elif page == "✅ Tasks":
             st.error(f"Error: {e}")
     
     with task_tabs[2]:
-        st.subheader("🐶 Kimi's TODOs")
+        st.markdown("### 🐶 Kimi's TODOs")
         try:
             kimi = fetch_kimi_todos()
             if 'error' in kimi:
@@ -1039,9 +997,9 @@ elif page == "✅ Tasks":
         except Exception as e:
             st.error(f"Error: {e}")
 
-# ==================== ACTIVITY ====================
-elif page == "🔥 Activity":
-    st.header("🔥 Activity Heatmap")
+# Row 7: Activity (expander)
+with st.expander("🔥 Activity", expanded=False):
+    st.markdown("### Activity Heatmap")
     
     try:
         sessions = get_activity_data()
@@ -1091,6 +1049,11 @@ elif page == "🔥 Activity":
     except Exception as e:
         st.error(f"Error loading activity data: {e}")
 
-# Footer
+# Logout button
 st.markdown("---")
+if st.button("🔒 Logout"):
+    st.session_state.authenticated = False
+    st.rerun()
+
+# Footer
 st.caption(f"🎯 Life Dashboard | {datetime.now().strftime('%Y-%m-%d %H:%M')}")

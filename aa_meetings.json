@@ -1,0 +1,117 @@
+{
+  "last_updated": "2026-02-16T18:40:45.448329",
+  "meetings": [
+    {
+      "day": "Sunday",
+      "time": "7:00 PM",
+      "town": "Sparta",
+      "type": [
+        "Open",
+        "Step"
+      ],
+      "location": "Shepherd of the Hills Lutheran Church, 246 Woodport Road",
+      "distance": 0.0
+    },
+    {
+      "day": "Sunday",
+      "time": "10:00 AM",
+      "town": "Oak Ridge",
+      "type": [
+        "Closed",
+        "Living",
+        "Discussion"
+      ],
+      "location": "Online Only",
+      "distance": 8.9
+    },
+    {
+      "day": "Monday",
+      "time": "10:00 AM",
+      "town": "Oak Ridge",
+      "type": [
+        "Closed",
+        "Living",
+        "Discussion"
+      ],
+      "location": "Online Only",
+      "distance": 8.9
+    },
+    {
+      "day": "Monday",
+      "time": "8:00 PM",
+      "town": "Sparta",
+      "type": [
+        "Closed",
+        "Step"
+      ],
+      "location": "First Presbyterian Church, 32 Main Street, Annex",
+      "distance": 0.0
+    },
+    {
+      "day": "Tuesday",
+      "time": "7:30 PM",
+      "town": "Stanhope",
+      "type": [
+        "Open",
+        "Beginners"
+      ],
+      "location": "First Presbyterian Church, 100 Main Street",
+      "distance": 8.4
+    },
+    {
+      "day": "Wednesday",
+      "time": "7:30 PM",
+      "town": "Oak Ridge",
+      "type": [
+        "Open",
+        "Discussion"
+      ],
+      "location": "Oak Ridge Presbyterian Church, 14 Oak Ridge Road",
+      "distance": 8.9
+    },
+    {
+      "day": "Thursday",
+      "time": "8:00 PM",
+      "town": "Sparta",
+      "type": [
+        "Closed",
+        "Discussion"
+      ],
+      "location": "First Presbyterian Church, 32 Main Street",
+      "distance": 0.0
+    },
+    {
+      "day": "Friday",
+      "time": "7:30 PM",
+      "town": "Oak Ridge",
+      "type": [
+        "Open",
+        "Discussion"
+      ],
+      "location": "Oak Ridge Presbyterian Church, 14 Oak Ridge Road",
+      "distance": 8.9
+    },
+    {
+      "day": "Saturday",
+      "time": "10:00 AM",
+      "town": "Oak Ridge",
+      "type": [
+        "Closed",
+        "Big Book"
+      ],
+      "location": "Online Only",
+      "distance": 8.9
+    },
+    {
+      "day": "Saturday",
+      "time": "6:00 PM",
+      "town": "Newton",
+      "type": [
+        "Open",
+        "Discussion"
+      ],
+      "location": "First Presbyterian Church, 119 Main Street",
+      "distance": 9.7
+    }
+  ]
+}

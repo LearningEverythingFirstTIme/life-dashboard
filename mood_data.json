@@ -1,0 +1,34 @@
+{
+  "2026-02-16": [
+    {
+      "mood": "amazing",
+      "note": "doing great!@",
+      "timestamp": "2026-02-16T03:37:48.082656"
+    },
+    {
+      "mood": "good",
+      "note": "Doing well in the morning.",
+      "timestamp": "2026-02-16T16:33:12.582799"
+    },
+    {
+      "mood": "great",
+      "note": "Doing well so far today",
+      "timestamp": "2026-02-16T11:36:39.137799-05:00"
+    },
+    {
+      "mood": "good",
+      "note": "?",
+      "timestamp": "2026-02-16T11:39:07.399828-05:00"
+    },
+    {
+      "mood": "great",
+      "note": "Super happy!",
+      "timestamp": "2026-02-16T11:43:42.561807-05:00"
+    },
+    {
+      "mood": "good",
+      "note": "Test mood entry",
+      "timestamp": "2026-02-16T11:51:43.417116-05:00"
+    }
+  ]
+}
