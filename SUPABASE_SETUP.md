@@ -1,45 +1,14 @@
 # Supabase Setup for Life Dashboard
 
-## Current Status
-- ❌ No Supabase project configured yet
-- 📁 Currently using JSON files for data persistence:
-  - `mood_data.json`
-  - `decisions.json`  
-  - `ideas.json`
+## ✅ Connected!
+
+The app is now configured to use Supabase. It falls back to JSON files if Supabase is unavailable.
 
 ---
 
-## What Nick Needs to Do
+## Database Tables Required
 
-### Step 1: Create a Free Supabase Account
-
-1. Go to **[supabase.com](https://supabase.com)**
-2. Click "Start your project" → Sign up with GitHub (easiest)
-3. Confirm your email if needed
-
-### Step 2: Create a New Project
-
-1. After login, click "New Project"
-2. Fill in the details:
-   - **Organization**: Select your GitHub account or create new
-   - **Name**: `life-dashboard` (or whatever you prefer)
-   - **Database Password**: Create a strong password (save this!)
-   - **Region**: `US East (N. Virginia)` or closest to you
-3. Click "Create new project"
-4. **Wait 1-2 minutes** for it to spin up
-
-### Step 3: Get API Credentials
-
-Once the project is ready:
-
-1. Click **Project Settings** (gear icon ⚙️) → **API**
-2. Copy these values:
-   - **Project URL** (looks like: `https://xxxxx-xxxxx.supabase.co`)
-   - **anon public** key (under "Project API keys")
-
-### Step 4: Create Database Tables
-
-In the Supabase dashboard, go to **SQL Editor** and run this script:
+Make sure these tables exist in your Supabase project:
 
 ```sql
 -- Create mood_entries table
@@ -66,51 +35,37 @@ CREATE TABLE ideas (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable Row Level Security (RLS) - optional but recommended
+-- Enable RLS (optional)
 ALTER TABLE mood_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE decisions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ideas ENABLE ROW LEVEL SECURITY;
 
--- Create policies to allow public access (for your app)
+-- Allow public access
 CREATE POLICY "Allow public access" ON mood_entries FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public access" ON decisions FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public access" ON ideas FOR ALL USING (true) WITH CHECK (true);
 ```
 
-Click **Run** to execute.
+---
+
+## Streamlit Cloud Secrets
+
+Add these to your Streamlit Cloud app secrets:
+
+```toml
+SUPABASE_URL = "https://xyeqihakfhwzphannakv.supabase.co"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5ZXFpaGFrZmh3enBoYW5uYWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMzkzNjMsImV4cCI6MjA4NjkxNTM2M30.C7wgyNJKCK2FeIP6ZbQ9U_aL02179FMFXF0HjmSR4OE"
+```
 
 ---
 
-## What Happens Next (After Nick Provides Credentials)
+## Local Development
 
-Once Nick gives me the Supabase URL and anon key, I'll:
+For local development, create a `.env` file:
 
-1. Add `supabase` to `requirements.txt`
-2. Update `streamlit_app.py` to:
-   - Load Supabase credentials from `st.secrets`
-   - Replace JSON file functions with Supabase calls
-   - Keep JSON fallback for local development
-3. Test locally
-4. Push changes to GitHub
+```bash
+SUPABASE_URL=https://xyeqihakfhwzphannakv.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5ZXFpaGFrZmh3enBoYW5uYWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMzkzNjMsImV4cCI6MjA4NjkxNTM2M30.C7wgyNJKCK2FeIP6ZbQ9U_aL02179FMFXF0HjmSR4OE
+```
 
----
-
-## Credentials Needed from Nick
-
-Please provide these two values (DM or paste them somewhere I can see):
-
-| Credential | Example |
-|------------|---------|
-| **Supabase URL** | `https://abc123-xyz789.supabase.co` |
-| **anon public key** | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
-
----
-
-## Alternative: Give Me Edit Access
-
-If you want me to do everything:
-1. Go to **Project Settings** → **Members**
-2. Invite: `nick@openclaw.com` (or your email)
-3. Role: **Developer**
-
-Then I can create the tables and get the keys myself.
+The app will use JSON files as fallback if Supabase credentials are not available.
