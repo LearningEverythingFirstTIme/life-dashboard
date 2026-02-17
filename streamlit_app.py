@@ -611,12 +611,6 @@ def get_ideas():
             print(f"Error fetching ideas from Supabase: {e}")
             return []
     return []
-        if Path(IDEAS_FILE).exists():
-            with open(IDEAS_FILE, 'r') as f:
-                return json.load(f)
-        return []
-    except Exception:
-        return []
 
 def add_idea(idea, context=""):
     """Add an idea to Supabase"""
