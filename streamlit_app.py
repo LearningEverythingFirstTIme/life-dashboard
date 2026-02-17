@@ -556,7 +556,7 @@ def get_mood_data():
         return {}
 
 def save_mood(mood, note=""):
-    """Save mood entry to Supabase or JSON file"""
+    """Save mood entry to Supabase"""
     if supabase_client:
         try:
             data = {
@@ -569,32 +569,9 @@ def save_mood(mood, note=""):
             return True
         except Exception as e:
             print(f"Error saving mood to Supabase: {e}")
-    
-    # Fallback to JSON file
-    try:
-        data = {}
-        if Path(MOOD_DATA_FILE).exists():
-            with open(MOOD_DATA_FILE, 'r') as f:
-                data = json.load(f)
-        
-        today = datetime.now().strftime('%Y-%m-%d')
-        
-        if today not in data:
-            data[today] = []
-        
-        data[today].append({
-            'mood': mood,
-            'note': note,
-            'timestamp': datetime.now().isoformat()
-        })
-        
-        with open(MOOD_DATA_FILE, 'w') as f:
-            json.dump(data, f, indent=2)
-        
-        get_mood_data.clear()
-        return True
-    except Exception as e:
-        print(f"Error saving mood: {e}")
+            return False
+    else:
+        print("Supabase not configured")
         return False
 
 def get_decisions():
@@ -618,7 +595,7 @@ def get_decisions():
         return []
 
 def add_decision(decision, context=""):
-    """Add a decision to Supabase or JSON file"""
+    """Add a decision to Supabase"""
     if supabase_client:
         try:
             data = {
@@ -631,24 +608,9 @@ def add_decision(decision, context=""):
             return True
         except Exception as e:
             print(f"Error saving decision to Supabase: {e}")
-    
-    # Fallback to JSON file
-    try:
-        decisions = []
-        if Path(DECISIONS_FILE).exists():
-            with open(DECISIONS_FILE, 'r') as f:
-                decisions = json.load(f)
-        decisions.append({
-            'timestamp': datetime.now().isoformat(),
-            'decision': decision,
-            'context': context
-        })
-        with open(DECISIONS_FILE, 'w') as f:
-            json.dump(decisions, f, indent=2)
-        get_decisions.clear()
-        return True
-    except Exception as e:
-        print(f"Error saving decision: {e}")
+            return False
+    else:
+        print("Supabase not configured")
         return False
 
 def get_ideas():
@@ -672,7 +634,7 @@ def get_ideas():
         return []
 
 def add_idea(idea, context=""):
-    """Add an idea to Supabase or JSON file"""
+    """Add an idea to Supabase"""
     if supabase_client:
         try:
             data = {
@@ -685,24 +647,9 @@ def add_idea(idea, context=""):
             return True
         except Exception as e:
             print(f"Error saving idea to Supabase: {e}")
-    
-    # Fallback to JSON file
-    try:
-        ideas = []
-        if Path(IDEAS_FILE).exists():
-            with open(IDEAS_FILE, 'r') as f:
-                ideas = json.load(f)
-        ideas.append({
-            'timestamp': datetime.now().isoformat(),
-            'idea': idea,
-            'context': context
-        })
-        with open(IDEAS_FILE, 'w') as f:
-            json.dump(ideas, f, indent=2)
-        get_ideas.clear()
-        return True
-    except Exception as e:
-        print(f"Error saving idea: {e}")
+            return False
+    else:
+        print("Supabase not configured")
         return False
 
 @st.cache_data(ttl=300)
