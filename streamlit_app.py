@@ -829,46 +829,6 @@ with st.expander("📝 Decisions & 💡 Ideas", expanded=False):
         except Exception as e:
             st.error(f"Error loading ideas: {e}")
 
-# Row 6: Tasks tabs (expander)
-with st.expander("✅ Tasks", expanded=False):
-    task_tabs = st.tabs(["Todoist", "Kimi's TODOs"])
-    
-    with task_tabs[0]:
-        st.markdown("### ✅ Todoist Tasks")
-        try:
-            todoist = fetch_todoist_tasks()
-            if 'error' in todoist:
-                st.warning(todoist['error'])
-            elif todoist.get('tasks'):
-                for task in todoist['tasks']:
-                    due_str = f" (due: {task['due']})" if task.get('due') else ""
-                    st.markdown(f"- [ ] {task['title']}{due_str}")
-            else:
-                st.success("🎉 No pending Todoist tasks!")
-        except Exception as e:
-            st.error(f"Error: {e}")
-    
-    with task_tabs[1]:
-        st.markdown("### 🐶 Kimi's TODOs")
-        try:
-            kimi = fetch_kimi_todos()
-            if 'error' in kimi:
-                st.warning(kimi['error'])
-            else:
-                if kimi.get('active'):
-                    st.markdown("**Active:**")
-                    for todo in kimi['active']:
-                        st.markdown(f"- [ ] {todo}")
-                else:
-                    st.info("No active tasks")
-                
-                if kimi.get('completed'):
-                    with st.expander("Completed"):
-                        for todo in kimi['completed']:
-                            st.markdown(f"- [x] {todo}")
-        except Exception as e:
-            st.error(f"Error: {e}")
-
 # Logout button
 st.markdown("---")
 if st.button("🔒 Logout"):
