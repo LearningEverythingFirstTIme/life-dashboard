@@ -749,32 +749,9 @@ with st.expander("📰 News", expanded=False):
         else:
             st.info("No news available. Check RSS feed configuration.")
 
-# Row 3: Stocks (expander)
-with st.expander("📈 Stocks", expanded=False):
-    try:
-        stocks = fetch_stocks()
-        
-        if 'error' in stocks:
-            st.warning(stocks['error'])
-        else:
-            for category, tickers in stocks.items():
-                st.markdown(f"**{category}**")
-                
-                cols = st.columns(len(tickers) if tickers else 1)
-                for i, stock in enumerate(tickers):
-                    with cols[i] if i < len(cols) else cols[0]:
-                        if 'error' in stock:
-                            st.metric(stock['ticker'], "—")
-                        else:
-                            delta = stock['change'] if stock['change'] else 0
-                            st.metric(stock['ticker'], f"${stock['price']:.2f}", f"{delta:+.2f}%")
-                
-                st.markdown("")
-    
-    except Exception as e:
-        st.error(f"Error fetching stocks: {e}")
+# Row 3: (removed Stocks - no API key configured)
 
-# Row 4: Mood tracker (expander)
+# Row 4: (removed Mood - needs redesign)
 with st.expander("😊 Mood Tracker", expanded=False):
     # Mood input
     moods = {
@@ -944,24 +921,9 @@ with st.expander("📝 Decisions & 💡 Ideas", expanded=False):
 
 # Row 6: Tasks tabs (expander)
 with st.expander("✅ Tasks", expanded=False):
-    task_tabs = st.tabs(["Notion", "Todoist", "Kimi's TODOs"])
+    task_tabs = st.tabs(["Todoist", "Kimi's TODOs"])
     
     with task_tabs[0]:
-        st.markdown("### 📓 Notion Tasks")
-        try:
-            notion = fetch_notion_tasks()
-            if 'error' in notion:
-                st.warning(notion['error'])
-            elif notion.get('tasks'):
-                for task in notion['tasks']:
-                    due_str = f" (due: {task['due']})" if task.get('due') else ""
-                    st.markdown(f"- [ ] {task['title']}{due_str}")
-            else:
-                st.success("🎉 No pending Notion tasks!")
-        except Exception as e:
-            st.error(f"Error: {e}")
-    
-    with task_tabs[1]:
         st.markdown("### ✅ Todoist Tasks")
         try:
             todoist = fetch_todoist_tasks()
@@ -976,7 +938,7 @@ with st.expander("✅ Tasks", expanded=False):
         except Exception as e:
             st.error(f"Error: {e}")
     
-    with task_tabs[2]:
+    with task_tabs[1]:
         st.markdown("### 🐶 Kimi's TODOs")
         try:
             kimi = fetch_kimi_todos()
