@@ -780,9 +780,8 @@ with st.expander("😊 Mood", expanded=False):
         # Save button
         if st.button("💾 Save Mood", key="save_mood_btn"):
             mood_label = mood_options.get(st.session_state.selected_mood, 'neutral')
-            success = save_mood(mood_label, success:
-                st note)
-            if.success(f"Mood saved: {st.session_state.selected_mood}")
+            if save_mood(mood_label, note):
+                st.success(f"Mood saved: {st.session_state.selected_mood}")
                 st.session_state.selected_mood = None
                 st.rerun()
             else:
