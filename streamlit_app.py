@@ -54,13 +54,19 @@ try:
 except:
     FINNHUB_API_KEY = os.environ.get('FINNHUB_API_KEY', '')
 
-# Supabase configuration
+# Supabase configuration - try secrets first, then env, then hardcoded fallback
 try:
     SUPABASE_URL = st.secrets.get('SUPABASE_URL', os.environ.get('SUPABASE_URL', ''))
     SUPABASE_ANON_KEY = st.secrets.get('SUPABASE_ANON_KEY', os.environ.get('SUPABASE_ANON_KEY', ''))
 except:
     SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
     SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY', '')
+
+# Fallback to hardcoded if empty (for testing)
+if not SUPABASE_URL:
+    SUPABASE_URL = "https://xyeqihakfhwzphannakv.supabase.co"
+if not SUPABASE_ANON_KEY:
+    SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5ZXFpaGFrZmh3enBoYW5uYWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMzkzNjMsImV4cCI6MjA4NjkxNTM2M30.C7wgyNJKCK2FeIP6ZbQ9U_aL02179FMFXF0HjmSR4OE"
 
 # Initialize Supabase client if credentials are available
 @st.cache_resource
