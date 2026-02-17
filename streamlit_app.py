@@ -926,11 +926,11 @@ with st.expander("📝 Decisions & 💡 Ideas", expanded=False):
             decisions = get_decisions()
             
             if decisions:
-                # Sort by timestamp
-                decisions = sorted(decisions, key=lambda x: x.get('timestamp', ''), reverse=True)
+                # Sort by created_at (Supabase uses created_at, not timestamp)
+                decisions = sorted(decisions, key=lambda x: x.get('created_at', ''), reverse=True)
                 
                 for d in decisions[:10]:
-                    ts = d.get('timestamp', '')
+                    ts = d.get('created_at', '')
                     try:
                         dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
                         date_str = dt.strftime('%Y-%m-%d %H:%M')
@@ -969,11 +969,11 @@ with st.expander("📝 Decisions & 💡 Ideas", expanded=False):
             ideas = get_ideas()
             
             if ideas:
-                # Sort by timestamp
-                ideas = sorted(ideas, key=lambda x: x.get('timestamp', ''), reverse=True)
+                # Sort by created_at (Supabase uses created_at, not timestamp)
+                ideas = sorted(ideas, key=lambda x: x.get('created_at', ''), reverse=True)
                 
                 for i in ideas[:10]:
-                    ts = i.get('timestamp', '')
+                    ts = i.get('created_at', '')
                     try:
                         dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
                         date_str = dt.strftime('%Y-%m-%d %H:%M')
