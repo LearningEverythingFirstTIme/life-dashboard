@@ -579,7 +579,6 @@ def get_decisions():
             print(f"Error fetching decisions from Supabase: {e}")
             return []
     return []
-        return []
 
 def add_decision(decision, context=""):
     """Add a decision to Supabase"""
