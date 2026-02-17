@@ -701,6 +701,62 @@ with row1_col2:
 
 st.markdown("---")
 
+# Row 1.5: AA Meetings
+DAY_MAP = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6}
+today_day = datetime.now().weekday()
+day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+with st.expander("🍀 AA Meetings This Week", expanded=True):
+    try:
+        import json
+        with open('aa_meetings.json', 'r') as f:
+            meetings_data = json.load(f)
+        
+        meetings = meetings_data.get('meetings', [])
+        
+        # Show today's and upcoming meetings
+        st.markdown("### 📅 This Week's Meetings")
+        
+        # Get this week's meetings starting from today
+        week_meetings = []
+        for i in range(7):
+            check_day = (today_day + i) % 7
+            day_name = day_names[check_day]
+            day_meetings = [m for m in meetings if m.get('day', '').lower() == day_name.lower()]
+            for m in day_meetings:
+                week_meetings.append({
+                    'day': day_name,
+                    'time': m.get('time', ''),
+                    'town': m.get('town', ''),
+                    'type': ', '.join(m.get('type', [])),
+                    'location': m.get('location', ''),
+                    'distance': m.get('distance', 0),
+                    'is_today': i == 0
+                })
+        
+        if week_meetings:
+            for m in week_meetings:
+                day_indicator = "🟢 " if m['is_today'] else ""
+                st.markdown(f"**{day_indicator}{m['day']} {m['time']}** — {m['town']} ({m['type']})")
+                st.caption(f"📍 {m['location']}")
+                if m['distance'] > 0:
+                    st.caption(f"🚗 {m['distance']} miles")
+                st.markdown("")
+        else:
+            st.info("No meetings found")
+        
+        # Attendance streak (placeholder)
+        st.markdown("---")
+        st.markdown("### 📊 Your Progress")
+        st.metric("Attendance Streak", "🔥 3 weeks")
+        
+        # Quick "I attended" button
+        if st.button("✅ I Attended Today!", key="i_attended"):
+            st.success("Great job! Keep coming back! 🍀")
+            
+    except Exception as e:
+        st.error(f"Error loading meetings: {e}")
+
 # Row 2: News (expander with 3 tabs)
 with st.expander("📰 News", expanded=False):
     news_tab = st.tabs(["General", "Tech+AI", "Market"])
