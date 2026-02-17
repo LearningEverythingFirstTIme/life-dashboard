@@ -556,16 +556,22 @@ def get_decisions():
 def add_decision(decision, context=""):
     """Add a decision to JSON file"""
     try:
-        decisions = get_decisions()
+        decisions_file = Path(DECISIONS_FILE)
+        decisions = []
+        if decisions_file.exists():
+            with open(decisions_file, 'r') as f:
+                decisions = json.load(f)
         decisions.append({
             'timestamp': datetime.now().isoformat(),
             'decision': decision,
             'context': context
         })
-        with open(DECISIONS_FILE, 'w') as f:
+        with open(decisions_file, 'w') as f:
             json.dump(decisions, f, indent=2)
+        get_decisions.clear()
         return True
-    except Exception:
+    except Exception as e:
+        print(f"Error saving decision: {e}")
         return False
 
 def get_ideas():
@@ -581,16 +587,22 @@ def get_ideas():
 def add_idea(idea, context=""):
     """Add an idea to JSON file"""
     try:
-        ideas = get_ideas()
+        ideas_file = Path(IDEAS_FILE)
+        ideas = []
+        if ideas_file.exists():
+            with open(ideas_file, 'r') as f:
+                ideas = json.load(f)
         ideas.append({
             'timestamp': datetime.now().isoformat(),
             'idea': idea,
             'context': context
         })
-        with open(IDEAS_FILE, 'w') as f:
+        with open(ideas_file, 'w') as f:
             json.dump(ideas, f, indent=2)
+        get_ideas.clear()
         return True
-    except Exception:
+    except Exception as e:
+        print(f"Error saving idea: {e}")
         return False
 
 @st.cache_data(ttl=300)
