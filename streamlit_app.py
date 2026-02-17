@@ -737,7 +737,97 @@ with st.expander("📰 News", expanded=False):
 
 # Row 3: (removed Stocks - no API key configured)
 
-# Row 4: (removed Mood - needs redesign)
+# Row 4: Mood Tracker
+with st.expander("😊 Mood", expanded=False):
+    st.markdown("### How are you feeling?")
+    
+    # Mood options and their labels
+    mood_options = {
+        '😢': 'sad',
+        '😔': 'down',
+        '😐': 'neutral',
+        '🙂': 'good',
+        '😊': 'happy',
+        '🤩': 'great'
+    }
+    
+    # Create columns for emoji buttons
+    mood_cols = st.columns(len(mood_options))
+    
+    # Use session state to track selected mood
+    if 'selected_mood' not in st.session_state:
+        st.session_state.selected_mood = None
+    
+    # Display emoji buttons
+    for i, (emoji, mood_label) in enumerate(mood_options.items()):
+        with mood_cols[i]:
+            if st.button(emoji, key=f"mood_{emoji}", use_container_width=True):
+                st.session_state.selected_mood = emoji
+    
+    # Show selected mood
+    if st.session_state.selected_mood:
+        st.markdown(f"**Selected:** {st.session_state.selected_mood} ({mood_options[st.session_state.selected_mood]})")
+        
+        # Note input
+        note = st.text_area("Add a note (optional):", key="mood_note", height=2)
+        
+        # Save button
+        if st.button("💾 Save Mood", key="save_mood_btn"):
+            if save_mood(mood_options[st.session_state.selected_mood], note):
+                st.success(f"Mood saved: {st.session_state.selected_mood}")
+                st.session_state.selected_mood = None
+                st.rerun()
+            else:
+                st.error("Failed to save mood")
+    
+    # Show recent mood history
+    st.markdown("---")
+    st.markdown("#### 📅 Recent Mood History")
+    
+    try:
+        mood_data = get_mood_data()
+        
+        if mood_data:
+            # Get last 14 days
+            today = datetime.now().date()
+            recent_moods = []
+            
+            for i in range(14):
+                check_date = today - timedelta(days=i)
+                date_str = check_date.strftime('%Y-%m-%d')
+                
+                if date_str in mood_data:
+                    for entry in mood_data[date_str]:
+                        # Map mood labels back to emojis
+                        label_to_emoji = {v: k for k, v in mood_options.items()}
+                        emoji = label_to_emoji.get(entry.get('mood', ''), '❓')
+                        
+                        ts = entry.get('timestamp', '')
+                        try:
+                            dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                            time_str = dt.strftime('%H:%M')
+                        except:
+                            time_str = ''
+                        
+                        recent_moods.append({
+                            'date': check_date.strftime('%a, %b %d'),
+                            'time': time_str,
+                            'emoji': emoji,
+                            'mood': entry.get('mood', ''),
+                            'note': entry.get('note', '')
+                        })
+            
+            if recent_moods:
+                for m in recent_moods[:20]:  # Show last 20 entries
+                    note_text = f" - *{m['note']}*" if m['note'] else ""
+                    st.markdown(f"**{m['date']} {m['time']}**: {m['emoji']} {m['mood']}{note_text}")
+            else:
+                st.info("No mood entries yet. Track your first mood above! 😊")
+        else:
+            st.info("No mood entries yet. Track your first mood above! 😊")
+    
+    except Exception as e:
+        st.error(f"Error loading mood history: {e}")
 
 # Row 5: Decisions + Ideas (two columns in expander)
 with st.expander("📝 Decisions & 💡 Ideas", expanded=False):
