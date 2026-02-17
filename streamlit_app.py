@@ -550,21 +550,22 @@ def get_mood_data():
 
 def save_mood(mood, note=""):
     """Save mood entry to Supabase"""
-    if supabase_client:
-        try:
-            data = {
-                'mood': mood,
-                'note': note,
-                'created_at': datetime.now().isoformat()
-            }
-            supabase_client.table('mood_entries').insert(data).execute()
-            get_mood_data.clear()
-            return True
-        except Exception as e:
-            print(f"Error saving mood to Supabase: {e}")
-            return False
-    else:
+    if not supabase_client:
         print("Supabase not configured")
+        return False
+    
+    try:
+        data = {
+            'mood': mood,
+            'note': note,
+            'created_at': datetime.now().isoformat()
+        }
+        result = supabase_client.table('mood_entries').insert(data).execute()
+        print(f"Mood saved successfully: {result}")
+        get_mood_data.clear()
+        return True
+    except Exception as e:
+        print(f"Error saving mood to Supabase: {e}")
         return False
 
 def get_decisions():
