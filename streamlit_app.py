@@ -825,7 +825,7 @@ with st.expander("😊 Mood", expanded=False):
                 st.session_state.selected_mood = None
                 st.rerun()
             else:
-                st.error("Failed to save mood - check file permissions")
+                st.error("Failed to save mood")
     
     # Show recent mood history
     st.markdown("---")
