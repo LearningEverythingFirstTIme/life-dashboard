@@ -524,6 +524,7 @@ def fetch_kimi_todos():
     except Exception as e:
         return {'error': str(e)}
 
+@st.cache_data(ttl=60)
 def get_mood_data():
     """Load mood data from Supabase"""
     if supabase_client:
@@ -560,14 +561,14 @@ def save_mood(mood, note=""):
             'note': note,
             'created_at': datetime.now().isoformat()
         }
-        result = supabase_client.table('mood_entries').insert(data).execute()
-        print(f"Mood saved successfully: {result}")
+        supabase_client.table('mood_entries').insert(data).execute()
         get_mood_data.clear()
         return True
     except Exception as e:
         print(f"Error saving mood to Supabase: {e}")
         return False
 
+@st.cache_data(ttl=60)
 def get_decisions():
     """Load decisions from Supabase"""
     if supabase_client:
@@ -583,23 +584,24 @@ def get_decisions():
 
 def add_decision(decision, context=""):
     """Add a decision to Supabase"""
-    if supabase_client:
-        try:
-            data = {
-                'decision': decision,
-                'context': context,
-                'created_at': datetime.now().isoformat()
-            }
-            supabase_client.table('decisions').insert(data).execute()
-            get_decisions.clear()
-            return True
-        except Exception as e:
-            print(f"Error saving decision to Supabase: {e}")
-            return False
-    else:
+    if not supabase_client:
         print("Supabase not configured")
         return False
+    
+    try:
+        data = {
+            'decision': decision,
+            'context': context,
+            'created_at': datetime.now().isoformat()
+        }
+        supabase_client.table('decisions').insert(data).execute()
+        get_decisions.clear()
+        return True
+    except Exception as e:
+        print(f"Error saving decision to Supabase: {e}")
+        return False
 
+@st.cache_data(ttl=60)
 def get_ideas():
     """Load ideas from Supabase"""
     if supabase_client:
@@ -615,21 +617,21 @@ def get_ideas():
 
 def add_idea(idea, context=""):
     """Add an idea to Supabase"""
-    if supabase_client:
-        try:
-            data = {
-                'idea': idea,
-                'context': context,
-                'created_at': datetime.now().isoformat()
-            }
-            supabase_client.table('ideas').insert(data).execute()
-            get_ideas.clear()
-            return True
-        except Exception as e:
-            print(f"Error saving idea to Supabase: {e}")
-            return False
-    else:
+    if not supabase_client:
         print("Supabase not configured")
+        return False
+    
+    try:
+        data = {
+            'idea': idea,
+            'context': context,
+            'created_at': datetime.now().isoformat()
+        }
+        supabase_client.table('ideas').insert(data).execute()
+        get_ideas.clear()
+        return True
+    except Exception as e:
+        print(f"Error saving idea to Supabase: {e}")
         return False
 
 @st.cache_data(ttl=300)
