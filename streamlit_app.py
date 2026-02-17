@@ -514,7 +514,12 @@ def get_mood_data():
 def save_mood(mood, note=""):
     """Save mood entry to JSON file"""
     try:
-        data = get_mood_data()
+        # Load existing data or create empty dict
+        data = {}
+        if Path(MOOD_DATA_FILE).exists():
+            with open(MOOD_DATA_FILE, 'r') as f:
+                data = json.load(f)
+        
         today = datetime.now().strftime('%Y-%m-%d')
         
         if today not in data:
@@ -533,6 +538,7 @@ def save_mood(mood, note=""):
         get_mood_data.clear()
         return True
     except Exception as e:
+        print(f"Error saving mood: {e}")
         return False
 
 def get_decisions():
@@ -818,9 +824,31 @@ with st.expander("😊 Mood", expanded=False):
                         })
             
             if recent_moods:
-                for m in recent_moods[:20]:  # Show last 20 entries
+                # Create chart data
+                chart_data = []
+                mood_values = {'awful': 1, 'bad': 2, 'okay': 3, 'good': 4, 'great': 5, 'amazing': 6}
+                
+                for m in recent_moods:
+                    value = mood_values.get(m['mood'], 3)
+                    chart_data.append({
+                        'date': m['date'],
+                        'value': value,
+                        'emoji': m['emoji']
+                    })
+                
+                if chart_data:
+                    df = pd.DataFrame(chart_data)
+                    chart = alt.Chart(df).mark_line(point=True).encode(
+                        x=alt.X('date', title=None, sort=None),
+                        y=alt.Y('value', scale=alt.Scale(domain=[0, 7]), title='Mood'),
+                        tooltip=['date', 'emoji']
+                    ).properties(height=150)
+                    st.altair_chart(chart, use_container_width=True)
+                
+                st.markdown("##### Recent Entries")
+                for m in recent_moods[:10]:  # Show last 10 entries
                     note_text = f" - *{m['note']}*" if m['note'] else ""
-                    st.markdown(f"**{m['date']} {m['time']}**: {m['emoji']} {m['mood']}{note_text}")
+                    st.markdown(f"**{m['date']}**: {m['emoji']} {m['mood']}{note_text}")
             else:
                 st.info("No mood entries yet. Track your first mood above! 😊")
         else:
