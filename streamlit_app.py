@@ -663,9 +663,9 @@ def get_activity_data():
 
 st.title("🎯 Life Dashboard")
 
-# Row 1: Weather | Sobriety Counter | System Info (3 columns)
+# Row 1: Weather | Sobriety Counter (2 columns)
 st.subheader("📊 Today's Overview")
-row1_col1, row1_col2, row1_col3 = st.columns(3)
+row1_col1, row1_col2 = st.columns(2)
 
 # Weather (Column 1)
 with row1_col1:
@@ -698,20 +698,6 @@ with row1_col2:
     st.metric("Days Sober", f"{sobriety['days']}")
     st.caption(sobriety['duration'])
     st.markdown(f"> *\"{sobriety['quote']}\"*  \n> — {sobriety['author']}")
-
-# System Info (Column 3)
-with row1_col3:
-    st.markdown("### 💻 System Info")
-    try:
-        sys_info = get_system_info()
-        st.metric("CPU", f"{sys_info['cpu']}%")
-        st.progress(sys_info['cpu'] / 100)
-        st.metric("RAM", f"{sys_info['ram']}%")
-        st.progress(sys_info['ram'] / 100)
-        st.metric("Disk", f"{sys_info['disk']}%")
-        st.progress(sys_info['disk'] / 100)
-    except Exception as e:
-        st.warning("System info unavailable")
 
 st.markdown("---")
 
