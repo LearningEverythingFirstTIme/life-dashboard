@@ -1,0 +1,7 @@
+streamlit>=1.30
+requests>=2.31
+feedparser>=6.0
+psutil>=5.9
+altair>=5.0
+plotly>=5.18
+pandas>=2.0
