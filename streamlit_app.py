@@ -16,6 +16,7 @@ from pathlib import Path
 from collections import defaultdict
 import pandas as pd
 import altair as alt
+from supabase import create_client, Client
 
 # ============================================================================
 # CONFIGURATION
@@ -52,6 +53,28 @@ try:
     FINNHUB_API_KEY = st.secrets.get('FINNHUB_API_KEY', os.environ.get('FINNHUB_API_KEY', ''))
 except:
     FINNHUB_API_KEY = os.environ.get('FINNHUB_API_KEY', '')
+
+# Supabase configuration
+try:
+    SUPABASE_URL = st.secrets.get('SUPABASE_URL', os.environ.get('SUPABASE_URL', ''))
+    SUPABASE_ANON_KEY = st.secrets.get('SUPABASE_ANON_KEY', os.environ.get('SUPABASE_ANON_KEY', ''))
+except:
+    SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
+    SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY', '')
+
+# Initialize Supabase client if credentials are available
+@st.cache_resource
+def get_supabase_client():
+    """Create Supabase client with credentials"""
+    if SUPABASE_URL and SUPABASE_ANON_KEY:
+        try:
+            return create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+        except Exception as e:
+            print(f"Error creating Supabase client: {e}")
+            return None
+    return None
+
+supabase_client = get_supabase_client()
 
 # File paths - simple filenames work on Streamlit Cloud
 MOOD_DATA_FILE = "mood_data.json"
@@ -502,7 +525,28 @@ def fetch_kimi_todos():
         return {'error': str(e)}
 
 def get_mood_data():
-    """Load mood data from JSON file"""
+    """Load mood data from Supabase or JSON file"""
+    if supabase_client:
+        try:
+            response = supabase_client.table('mood_entries').select('*').order('timestamp', desc=True).execute()
+            if response.data:
+                # Organize by date
+                data = {}
+                for entry in response.data:
+                    date_str = entry.get('created_at', '')[:10]
+                    if date_str not in data:
+                        data[date_str] = []
+                    data[date_str].append({
+                        'mood': entry.get('mood', ''),
+                        'note': entry.get('note', ''),
+                        'timestamp': entry.get('created_at', '')
+                    })
+                return data
+            return {}
+        except Exception as e:
+            print(f"Error fetching mood from Supabase: {e}")
+    
+    # Fallback to JSON file
     try:
         if Path(MOOD_DATA_FILE).exists():
             with open(MOOD_DATA_FILE, 'r') as f:
@@ -512,9 +556,22 @@ def get_mood_data():
         return {}
 
 def save_mood(mood, note=""):
-    """Save mood entry to JSON file"""
+    """Save mood entry to Supabase or JSON file"""
+    if supabase_client:
+        try:
+            data = {
+                'mood': mood,
+                'note': note,
+                'created_at': datetime.now().isoformat()
+            }
+            supabase_client.table('mood_entries').insert(data).execute()
+            get_mood_data.clear()
+            return True
+        except Exception as e:
+            print(f"Error saving mood to Supabase: {e}")
+    
+    # Fallback to JSON file
     try:
-        # Load existing data or create empty dict
         data = {}
         if Path(MOOD_DATA_FILE).exists():
             with open(MOOD_DATA_FILE, 'r') as f:
@@ -534,7 +591,6 @@ def save_mood(mood, note=""):
         with open(MOOD_DATA_FILE, 'w') as f:
             json.dump(data, f, indent=2)
         
-        # Clear cache
         get_mood_data.clear()
         return True
     except Exception as e:
@@ -542,7 +598,17 @@ def save_mood(mood, note=""):
         return False
 
 def get_decisions():
-    """Load decisions from JSON file"""
+    """Load decisions from Supabase or JSON file"""
+    if supabase_client:
+        try:
+            response = supabase_client.table('decisions').select('*').order('created_at', desc=True).execute()
+            if response.data:
+                return response.data
+            return []
+        except Exception as e:
+            print(f"Error fetching decisions from Supabase: {e}")
+    
+    # Fallback to JSON file
     try:
         if Path(DECISIONS_FILE).exists():
             with open(DECISIONS_FILE, 'r') as f:
@@ -552,7 +618,21 @@ def get_decisions():
         return []
 
 def add_decision(decision, context=""):
-    """Add a decision to JSON file"""
+    """Add a decision to Supabase or JSON file"""
+    if supabase_client:
+        try:
+            data = {
+                'decision': decision,
+                'context': context,
+                'created_at': datetime.now().isoformat()
+            }
+            supabase_client.table('decisions').insert(data).execute()
+            get_decisions.clear()
+            return True
+        except Exception as e:
+            print(f"Error saving decision to Supabase: {e}")
+    
+    # Fallback to JSON file
     try:
         decisions = []
         if Path(DECISIONS_FILE).exists():
@@ -572,7 +652,17 @@ def add_decision(decision, context=""):
         return False
 
 def get_ideas():
-    """Load ideas from JSON file"""
+    """Load ideas from Supabase or JSON file"""
+    if supabase_client:
+        try:
+            response = supabase_client.table('ideas').select('*').order('created_at', desc=True).execute()
+            if response.data:
+                return response.data
+            return []
+        except Exception as e:
+            print(f"Error fetching ideas from Supabase: {e}")
+    
+    # Fallback to JSON file
     try:
         if Path(IDEAS_FILE).exists():
             with open(IDEAS_FILE, 'r') as f:
@@ -582,7 +672,21 @@ def get_ideas():
         return []
 
 def add_idea(idea, context=""):
-    """Add an idea to JSON file"""
+    """Add an idea to Supabase or JSON file"""
+    if supabase_client:
+        try:
+            data = {
+                'idea': idea,
+                'context': context,
+                'created_at': datetime.now().isoformat()
+            }
+            supabase_client.table('ideas').insert(data).execute()
+            get_ideas.clear()
+            return True
+        except Exception as e:
+            print(f"Error saving idea to Supabase: {e}")
+    
+    # Fallback to JSON file
     try:
         ideas = []
         if Path(IDEAS_FILE).exists():

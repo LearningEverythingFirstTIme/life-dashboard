@@ -5,3 +5,4 @@ psutil>=5.9
 altair>=5.0
 plotly>=5.18
 pandas>=2.0
+supabase>=2.0
