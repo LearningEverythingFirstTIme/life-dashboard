@@ -525,10 +525,10 @@ def fetch_kimi_todos():
         return {'error': str(e)}
 
 def get_mood_data():
-    """Load mood data from Supabase or JSON file"""
+    """Load mood data from Supabase"""
     if supabase_client:
         try:
-            response = supabase_client.table('mood_entries').select('*').order('timestamp', desc=True).execute()
+            response = supabase_client.table('mood_entries').select('*').order('created_at', desc=True).execute()
             if response.data:
                 # Organize by date
                 data = {}
@@ -545,15 +545,8 @@ def get_mood_data():
             return {}
         except Exception as e:
             print(f"Error fetching mood from Supabase: {e}")
-    
-    # Fallback to JSON file
-    try:
-        if Path(MOOD_DATA_FILE).exists():
-            with open(MOOD_DATA_FILE, 'r') as f:
-                return json.load(f)
-        return {}
-    except Exception:
-        return {}
+            return {}
+    return {}
 
 def save_mood(mood, note=""):
     """Save mood entry to Supabase"""
@@ -575,7 +568,7 @@ def save_mood(mood, note=""):
         return False
 
 def get_decisions():
-    """Load decisions from Supabase or JSON file"""
+    """Load decisions from Supabase"""
     if supabase_client:
         try:
             response = supabase_client.table('decisions').select('*').order('created_at', desc=True).execute()
@@ -584,14 +577,8 @@ def get_decisions():
             return []
         except Exception as e:
             print(f"Error fetching decisions from Supabase: {e}")
-    
-    # Fallback to JSON file
-    try:
-        if Path(DECISIONS_FILE).exists():
-            with open(DECISIONS_FILE, 'r') as f:
-                return json.load(f)
-        return []
-    except Exception:
+            return []
+    return []
         return []
 
 def add_decision(decision, context=""):
@@ -614,7 +601,7 @@ def add_decision(decision, context=""):
         return False
 
 def get_ideas():
-    """Load ideas from Supabase or JSON file"""
+    """Load ideas from Supabase"""
     if supabase_client:
         try:
             response = supabase_client.table('ideas').select('*').order('created_at', desc=True).execute()
@@ -623,9 +610,8 @@ def get_ideas():
             return []
         except Exception as e:
             print(f"Error fetching ideas from Supabase: {e}")
-    
-    # Fallback to JSON file
-    try:
+            return []
+    return []
         if Path(IDEAS_FILE).exists():
             with open(IDEAS_FILE, 'r') as f:
                 return json.load(f)
